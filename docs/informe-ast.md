@@ -17,7 +17,7 @@ de Programación — Universidad del Valle, Sede Tuluá.
 
 | Nombre | Código | Correo institucional |
 |--------|--------|----------------------|
-| {{Nombre 1}} | {{Código 1}} | {{correo1@correounivalle.edu.co}} |
+| Juan Eduardo Calderon Jaramillo | 2611001-3743 | juan.eduardo.calderon@correounivalle.edu.co  |
 | {{Nombre 2}} | {{Código 2}} | {{correo2@correounivalle.edu.co}} |
 
 ---
