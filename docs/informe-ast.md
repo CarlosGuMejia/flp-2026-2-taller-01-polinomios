@@ -1,15 +1,5 @@
 # Informe de AST — Taller 1: polinomios dispersos
 
-> **Plantilla de entrega.** Copie este archivo a `docs/informe-ast.md`
-> dentro del repositorio del grupo y reemplace los marcadores
-> `{{...}}` con su contenido. **No elimine las secciones
-> obligatorias.** No se aceptan PDF, DOCX ni imágenes insertadas:
-> todo el documento debe ser Markdown, las fórmulas en LaTeX
-> (`$...$` / `$$...$$`) y los diagramas en Mermaid.
->
-> Este taller no pide traza de evaluación ni cadena de ambientes; el
-> intérprete llega en el Taller 2.
-
 **Curso:** Fundamentos de Interpretación y Compilación de Lenguajes
 de Programación — Universidad del Valle, Sede Tuluá.
 
@@ -17,8 +7,9 @@ de Programación — Universidad del Valle, Sede Tuluá.
 
 | Nombre | Código | Correo institucional |
 |--------|--------|----------------------|
-| Juan Eduardo Calderon Jaramillo | 2611001-3743 | juan.eduardo.calderon@correounivalle.edu.co  |
+| Juan Eduardo Calderon Jaramillo | 2611001-3743 | juan.eduardo.calderon@correounivalle.edu.co |
 | {{Nombre 2}} | {{Código 2}} | {{correo2@correounivalle.edu.co}} |
+| {{Nombre 3}} | {{Código 3}} | {{correo3@correounivalle.edu.co}} |
 
 ---
 
@@ -30,26 +21,26 @@ sección 2.
 
 ```bnf
 <polinomio>   ::= <variable> <terminos>
-                   poli(var, terms)
+                  poli(var, terms)
 
 <variable>    ::= <symbol>
-                   nombre-var(s)
+                  nombre-var(s)
 
 <terminos>    ::= '()
-                   sin-terminos()
-              ::= <termino> <terminos>
-                   mas-terminos(term, resto)
+                  sin-terminos()
+                | <termino> <terminos>
+                  mas-terminos(term, resto)
 
 <termino>     ::= <coeficiente> <exponente>
-                   termino(coef, expo)
+                  termino(coef, expo)
 
 <coeficiente> ::= <int>
-                   coef-ent(n)
-              ::= <int> "/" <int>
-                   coef-rac(num, den)
+                  coef-ent(n)
+                | <int> "/" <int>
+                  coef-rac(num, den)
 
 <exponente>   ::= <int>
-                   expo-nat(k)
+                  expo-nat(k)
 ```
 
 Indique cómo se realiza cada no terminal en su implementación con
@@ -57,11 +48,11 @@ Indique cómo se realiza cada no terminal en su implementación con
 
 | No terminal | Variantes del datatype | Campos |
 |---|---|---|
-| `<polinomio>` | `poli` | {{var, terms}} |
-| `<terminos>` | `sin-terminos`, `mas-terminos` | {{...}} |
-| `<termino>` | `termino` | {{...}} |
-| `<coeficiente>` | `coef-ent`, `coef-rac` | {{...}} |
-| `<exponente>` | `expo-nat` | {{...}} |
+| `<polinomio>` | `poli` | `var`, `terms` |
+| `<terminos>` | `sin-terminos`, `mas-terminos` | `sin-terminos`: ninguno; `mas-terminos`: `term`, `resto` |
+| `<termino>` | `termino` | `coef`, `expo` |
+| `<coeficiente>` | `coef-ent`, `coef-rac` | `coef-ent`: `n`; `coef-rac`: `num`, `den` |
+| `<exponente>` | `expo-nat` | `k` |
 
 ---
 
@@ -78,14 +69,14 @@ Indique cómo se realiza cada no terminal en su implementación con
 
 ### Ejemplo 1 — un solo término con coeficiente entero
 
-**Polinomio:** $p_1 = {{7x^{3}}}$
+**Polinomio:** $p_1 = 7x^{3}$
 
 **Construcción:**
 
 ```scheme
-{{(poli (nombre-var 'x)
-        (mas-terminos (termino (coef-ent 7) (expo-nat 3))
-                      (sin-terminos)))}}
+(poli (nombre-var 'x)
+      (mas-terminos (termino (coef-ent 7) (expo-nat 3))
+                    (sin-terminos)))
 ```
 
 **AST:**
@@ -101,20 +92,21 @@ graph TD
   C --> G[sin-terminos]
 ```
 
-**Explicación:** {{qué nodo corresponde a la variable, cómo la lista
-de términos se cierra con `sin-terminos` y por qué el coeficiente y el
-exponente son nodos separados.}}
+**Explicación:** el nodo `nombre-var` guarda el símbolo de la variable (`x`), separado de la lista de términos. El único término del polinomio cuelga de `mas-terminos`, cuyo segundo hijo es `sin-terminos`: ese nodo cierra la lista y marca que no hay más términos después. El coeficiente y el exponente son nodos separados porque termino tiene los campos coef y expo.
 
 ---
 
 ### Ejemplo 2 — dos términos, uno con coeficiente racional
 
-**Polinomio:** $p_2 = {{\frac{3}{4}x^{5} - 2x}}$
+**Polinomio:** $p_2 = \frac{3}{4}x^{5} - 2x$
 
 **Construcción:**
 
 ```scheme
-{{...}}
+(poli (nombre-var 'x)
+      (mas-terminos (termino (coef-rac 3 4) (expo-nat 5))
+                    (mas-terminos (termino (coef-ent -2) (expo-nat 1))
+                                  (sin-terminos))))
 ```
 
 **AST:**
@@ -122,23 +114,38 @@ exponente son nodos separados.}}
 ```mermaid
 graph TD
   A[poli]
-  %% ...
+  A --> B[nombre-var: x]
+  A --> C[mas-terminos]
+  C --> D[termino]
+  D --> E[coef-rac]
+  E --> E1[num: 3]
+  E --> E2[den: 4]
+  D --> F[expo-nat: 5]
+  C --> G[mas-terminos]
+  G --> H[termino]
+  H --> I[coef-ent: -2]
+  H --> J[expo-nat: 1]
+  G --> K[sin-terminos]
 ```
 
-**Explicación:** {{en qué se diferencia el subárbol de `coef-rac` del
-de `coef-ent`, y cómo se ve en el árbol el orden decreciente de
-exponentes que exige el invariante.}}
+**Explicación:** `coef-rac` se diferencia de `coef-ent` en que tiene
+**dos** hijos (`num` y `den`) en vez de uno solo (`n`), porque representa el numerador y el denominador por separado. El orden  decreciente de exponentes que exige el invariante se ve en la
+*anidación* de los `mas-terminos`: el término con exponente 5 aparece en el primer nivel, y el de exponente 1 en el `mas-terminos` anidado  inmediatamente después — nunca en orden inverso.
 
 ---
 
 ### Ejemplo 3 — tres o más términos, con término independiente
 
-**Polinomio:** $p_3 = {{...}}$
+**Polinomio:** $p_3 = 4x^{5} - \frac{3}{2}x^{2} + 7$
 
 **Construcción:**
 
 ```scheme
-{{...}}
+(poli (nombre-var 'x)
+      (mas-terminos (termino (coef-ent 4) (expo-nat 5))
+                    (mas-terminos (termino (coef-rac -3 2) (expo-nat 2))
+                                  (mas-terminos (termino (coef-ent 7) (expo-nat 0))
+                                                (sin-terminos)))))
 ```
 
 **AST:**
@@ -146,44 +153,85 @@ exponentes que exige el invariante.}}
 ```mermaid
 graph TD
   A[poli]
-  %% ...
+  A --> B[nombre-var: x]
+  A --> C[mas-terminos]
+  C --> D[termino]
+  D --> E[coef-ent: 4]
+  D --> F[expo-nat: 5]
+  C --> G[mas-terminos]
+  G --> H[termino]
+  H --> I[coef-rac]
+  I --> I1[num: -3]
+  I --> I2[den: 2]
+  H --> J[expo-nat: 2]
+  G --> K[mas-terminos]
+  K --> L[termino]
+  L --> M[coef-ent: 7]
+  L --> N[expo-nat: 0]
+  K --> O[sin-terminos]
 ```
 
-**Explicación:** {{cómo se representa el término independiente y por
-qué su exponente sigue siendo un nodo `expo-nat`.}}
+**Explicación:** el término independiente se representa igual que
+cualquier otro término. La diferencia es que su exponente es `0`, por
+lo que aparece como `expo-nat: 0`.
 
 ---
 
 ### Ejemplo 4 — el resultado de `(sumar p q)`
 
-Use los polinomios $p$ y $q$ del ejemplo de la Parte 3 del enunciado.
+Usando los polinomios del ejemplo de la Parte 3 del enunciado:
 
 **Operandos:**
 
-- $p = {{...}}$
-- $q = {{...}}$
+- $p = 4x^{5} - \frac{3}{2}x^{2} + 7$
+- $q = -4x^{5} + \frac{1}{2}x^{2} + 2x$
 
-**Resultado:** $p + q = {{...}}$
+**Resultado:** $p + q = -x^{2} + 2x + 7$
+
+**Construcción del resultado:**
+
+```scheme
+(poli (nombre-var 'x)
+      (mas-terminos (termino (coef-ent -1) (expo-nat 2))
+                    (mas-terminos (termino (coef-ent 2) (expo-nat 1))
+                                  (mas-terminos (termino (coef-ent 7) (expo-nat 0))
+                                                (sin-terminos)))))
+```
 
 **AST del resultado:**
 
 ```mermaid
 graph TD
   A[poli]
-  %% ...
+  A --> B[nombre-var: x]
+  A --> C[mas-terminos]
+  C --> D[termino]
+  D --> E[coef-ent: -1]
+  D --> F[expo-nat: 2]
+  C --> G[mas-terminos]
+  G --> H[termino]
+  H --> I[coef-ent: 2]
+  H --> J[expo-nat: 1]
+  G --> K[mas-terminos]
+  K --> L[termino]
+  L --> M[coef-ent: 7]
+  L --> N[expo-nat: 0]
+  K --> O[sin-terminos]
 ```
 
-**Origen de cada nodo.** Complete la tabla: por cada término del
-resultado, de cuál operando salió, y aparte los términos que se
-cancelaron y por eso no aparecen en el árbol.
+**Origen de cada nodo:**
 
 | Término del resultado | Viene de | Observación |
 |---|---|---|
-| {{coeficiente y exponente}} | {{p / q / suma de ambos}} | {{...}} |
+| $-1x^{2}$ | suma de ambos | $p$ aporta $-\frac{3}{2}$ y $q$ aporta $\frac{1}{2}$; $-\frac{3}{2}+\frac{1}{2}=-1$ |
+| $2x^{1}$ | $q$ | $p$ no tiene término de exponente 1, pasa sin combinarse |
+| $7x^{0}$ | $p$ | $q$ no tiene término independiente, pasa sin combinarse |
 
-**Términos cancelados:** {{cuáles se anularon, con la suma de
-coeficientes que dio cero, y por qué el invariante obliga a que no
-aparezcan en el resultado.}}
+**Términos cancelados:** el término de exponente 5 se cancela por
+completo: $p$ aporta $4$ y $q$ aporta $-4$, y $4+(-4)=0$. Por la
+segunda condición del invariante ("sin ceros"), el término de
+exponente 5 no se incluye en la cadena de `mas-terminos`, porque su
+coeficiente resultante es 0.
 
 ---
 
@@ -193,4 +241,3 @@ aparezcan en el resultado.}}
   3.ª ed., MIT Press, 2008. Sección 2.1 (especificación de datos),
   sección 2.2 (representaciones de un TAD), sección 2.4
   (`define-datatype` y `cases`).
-- {{Otras referencias que hayan consultado.}}
