@@ -306,7 +306,7 @@
 ;; Ejemplos de las funciones principales
 *******
 
-;; Los errores se prueban en pruebas-polinomios.rkt.
+;; Los errores se prueban en pruebas-polinomios.rkt
 
 ;; -- polinomio-cero --
 (polinomio-cero 'x)                 ;; el polinomio nulo en x
