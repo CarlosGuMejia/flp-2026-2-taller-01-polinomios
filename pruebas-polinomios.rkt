@@ -6,6 +6,7 @@
 ;; Parte 4: pruebas para las tres representaciones.
 
 (require rackunit)
+(require (only-in racket/base exn:fail?))
 (require (prefix-in listas: "polinomios-listas.rkt"))
 (require (prefix-in procs:  "polinomios-procedimientos.rkt"))
 (require (prefix-in dt:     "polinomios-datatypes.rkt"))

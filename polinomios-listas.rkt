@@ -23,9 +23,9 @@
 (provide coef-rac coef-rac? coef-rac->num coef-rac->den)
 (provide expo-nat expo-nat? expo-nat->k)
 
-*******
+;;*******
 ;; Funciones para crear y revisar las partes
-*******
+;;*******
 
 ;; poli : variable x terminos -> polinomio
 ;; Crea un polinomio con una variable y sus términos.
@@ -163,9 +163,9 @@
       [(coef-rac? c) (/ (coef-rac->num c) (coef-rac->den c))]
       [else (eopl:error 'coef-abstracto->concreto "coeficiente invalido: ~s" c)])))
 
-*******
+;;*******
 ;; Funciones principales
-*******
+;;*******
 
 ;; polinomio-cero : symbol -> polinomio
 ;; Crea el polinomio cero.
@@ -267,9 +267,9 @@
            [(= e-actual expo-concreto) resto]
            [else (mas-terminos t (quitar-termino resto expo-concreto))]))])))
 
-*******
+;;*******
 ;; Ejemplos
-*******
+;;*******
 
 ;; Ejemplo 1: polinomio cero
 (define ejemplo-1 (polinomio-cero 'x))
@@ -302,9 +302,9 @@
 (define ejemplo-5-primer-coef (coef-ent->n (termino->coef ejemplo-5-primer-termino)))
 (define ejemplo-5-primer-expo (expo-nat->k (termino->expo ejemplo-5-primer-termino)))
 
-*******
+;;*******
 ;; Ejemplos de las funciones principales
-*******
+;;*******
 
 ;; Los errores se prueban en pruebas-polinomios.rkt
 
