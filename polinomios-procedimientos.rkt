@@ -1,6 +1,6 @@
 #lang eopl
-;Autores: Juan Eduardo Calderon Jaramillo 2611001-3743, 
-          Jesus David Lopez Diaz 2611029-3743
+;Autores: Jesus David Lopez Diaz 2611029-3743
+          
 
 ;; Taller 1 - Polinomios dispersos.
 ;; Parte 2: polinomios con procedimientos.
