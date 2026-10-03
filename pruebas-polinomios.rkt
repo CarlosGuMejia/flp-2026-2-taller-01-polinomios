@@ -1,5 +1,5 @@
 #lang eopl
-;Autores: Juan Eduardo Calderon Jaramillo 2611001-3743
+;Autores: Juan Eduardo Calderon Jaramillo 2611001-3743, Jesus David Lopez Diaz 2611029-3743
 
 
 ;; Taller 1 - Polinomios dispersos.
@@ -108,8 +108,6 @@
 
 ;; Representación con procedimientos
 
-;; Aquí se revisan los resultados de las funciones.
-
 ;; -- Polinomio cero --
 (check-equal?
   (procs:poli? (procs:polinomio-cero 'x))
@@ -205,9 +203,12 @@
   (lambda ()
     (procs:eliminar-termino p-general-procs 3)))
 
+#|
+;; =================================================================
 ;; Representación con datatypes
-
-;; Aquí también se revisan los resultados de las funciones.
+;; Comentado temporalmente: polinomios-datatypes.rkt todavía es
+;; la plantilla sin implementar (Carlos). Descomentar cuando esté listo.
+;; =================================================================
 
 ;; -- Polinomio cero --
 (check-equal?
@@ -334,3 +335,4 @@
   exn:fail?
   (lambda ()
     (dt:sumar p-sumar (dt:polinomio-cero 'y))))
+|#
