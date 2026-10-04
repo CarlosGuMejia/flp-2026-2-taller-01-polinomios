@@ -205,7 +205,7 @@
   (lambda ()
     (procs:eliminar-termino p-general-procs 3)))
 
-#|
+
 ;; =================================================================
 ;; Representación con datatypes
 ;; Comentado temporalmente: polinomios-datatypes.rkt todavía es
@@ -337,4 +337,3 @@
   exn:fail?
   (lambda ()
     (dt:sumar p-sumar (dt:polinomio-cero 'y))))
-|#
