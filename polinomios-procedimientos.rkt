@@ -1,6 +1,8 @@
 #lang eopl
-;Autores: Jesus David Lopez Diaz 2611029-3743
-          
+;Autores: Juan Eduardo Calderon Jaramillo | 2611001-3743 | juan.eduardo.calderon@correounivalle.edu.co  |
+;         Jesus David Lopez Diaz          | 2611029-3743 | jesus.david.lopez@correounivalle.edu.co      |
+;         Carlos Humberto Gutierrez Mejia | 2059817-3743 | carlos.humberto.gutierrez@correounivalle.edu.co |
+         
 
 ;; Taller 1 - Polinomios dispersos.
 ;; Parte 2: polinomios con procedimientos.
