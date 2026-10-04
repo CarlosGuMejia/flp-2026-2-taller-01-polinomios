@@ -12,7 +12,6 @@ de Programación — Universidad del Valle, Sede Tuluá.
 
 | Nombre | Código | Correo institucional |
 |--------|--------|----------------------|
-| Juan Eduardo Calderon Jaramillo | 2611001-3743 | juan.eduardo.calderon@correounivalle.edu.co  |
 | Jesus David Lopez Diaz          | 2611029-3743 | jesus.david.lopez@correounivalle.edu.co      |
 | Carlos Humberto Gutierrez Mejia | 2059817-3743 | carlos.humberto.gutierrez@correounivalle.edu.co |
 
@@ -530,20 +529,154 @@ El invariante **se conserva** en cada paso; no se restaura después.
 
 ## 3. Equivalencia de las dos representaciones
 
-Argumente por qué las funciones de la interfaz son las mismas para la
-representación basada en listas y la basada en procedimientos, y qué
-propiedad de la interfaz impide que el cliente las distinga. Basta una
-explicación conceptual apoyada en la sección 2.2 de EOPL, sin
-demostración formal.
+La sección 2.2 de EOPL presenta un mismo tipo de dato con varias
+representaciones y fija la idea central: el programa cliente se escribe
+contra la **interfaz** (constructores y observadores) y no contra la forma
+concreta del dato. Aquí hay dos representaciones del mismo TAD:
 
-Conviene que la explicación responda a esto:
+| Valor | Listas (`polinomios-listas.rkt`) | Procedimientos (`polinomios-procedimientos.rkt`) |
+|---|---|---|
+| `(coef-ent 4)` | `(list 'coef-ent 4)` | `(lambda (msg) ...)` que responde `'coef-ent` a `'tag` y `4` a `'n` |
+| `(termino c e)` | `(list 'termino c e)` | `(lambda (msg) ...)` que responde a `'tag`, `'coef` y `'expo` |
+| `(mas-terminos t r)` | `(list 'mas-terminos t r)` | `(lambda (msg) ...)` que responde a `'tag`, `'term` y `'resto` |
+| `(poli->terms p)` | `(caddr p)` | `(p 'terms)` |
+| `(poli? x)` | `(and (pair? x) (eq? (car x) 'poli))` | `(and (procedure? x) (eq? (x 'tag) 'poli))` |
 
-- {{Qué ve el cliente de un polinomio: qué operaciones tiene
-  disponibles y qué no puede hacer.}}
-- {{Qué cambia entre las dos representaciones y por qué ese cambio
-  queda del lado de adentro de la interfaz.}}
-- {{Qué habría que hacer para que el cliente sí notara la diferencia,
-  y por qué eso significaría que la abstracción se rompió.}}
+Las funciones `polinomio-cero`, `insertar-termino`, `coeficiente-de` y
+`eliminar-termino`, junto con sus auxiliares (`insertar-en-terminos`,
+`buscar-coeficiente`, `quitar-termino`), tienen el mismo texto en los dos
+archivos: al comparar el código sin comentarios ni espacios, la única
+diferencia está en la sección de definición de constructores y
+observadores. Los constructores, los predicados (`poli?`, `sin-terminos?`, ...) y los
+extractores (`poli->var`, `mas-terminos->term`, ...) tienen los mismos
+nombres, los mismos contratos y el mismo comportamiento observable en las
+dos columnas.
+
+```mermaid
+flowchart TB
+    C["Cliente: polinomio-cero, insertar-termino,<br/>coeficiente-de, eliminar-termino"]
+    I["Interfaz: constructores, predicados y extractores<br/>(poli, mas-terminos, termino->coef, sin-terminos?, ...)"]
+    L["Representación con listas<br/>(listas con etiqueta)"]
+    P["Representación con procedimientos<br/>(clausuras que responden a mensajes)"]
+    C --> I
+    I --> L
+    I --> P
+```
+
+### 3.1 Qué ve el cliente de un polinomio
+
+Las cuatro funciones de la interfaz solo usan los constructores
+(`poli`, `sin-terminos`, `mas-terminos`, `termino`, `coef-ent`,
+`coef-rac`, `expo-nat`, `nombre-var`), los predicados y los extractores.
+Con ellos pueden:
+
+- **Construir** un polinomio, o una pieza suya.
+- **Preguntar** de qué variante es un valor (`sin-terminos?`,
+  `mas-terminos?`, `coef-ent?`, ...).
+- **Extraer** los campos de una variante (`mas-terminos->term`,
+  `termino->expo`, `coef-rac->den`, ...).
+
+Es decir, el cliente conoce el **contrato** de cada operación, que
+queda fijado por la gramática BNF y por el invariante $\mathrm{Inv}$, y
+nada más. No puede saber si un `mas-terminos` es una lista de tres
+elementos o una función de un argumento, ni en qué orden están los campos
+dentro de la estructura, ni con qué etiqueta se distingue una variante de
+otra. Tampoco puede aplicar `car`, `cdr` o `list-ref` a un polinomio con
+la esperanza de que funcione: esas operaciones no forman parte de la
+interfaz.
+
+Esto se ve en el código de la Parte 2. `insertar-en-terminos`,
+`buscar-coeficiente` y `quitar-termino` preguntan con `sin-terminos?`,
+sacan el primer término con `mas-terminos->term`, el resto con
+`mas-terminos->resto` y el exponente con `expo-nat->k`, y reconstruyen con
+`mas-terminos` y `termino`. Todo pasa por la interfaz.
+
+### 3.2 Qué cambia entre las dos representaciones
+
+Cambia únicamente **cómo se materializa cada variante**:
+
+- En la representación con listas, el constructor arma una lista
+  cuyo primer elemento es la etiqueta y los extractores seleccionan
+  posiciones de esa lista. Los predicados comparan la etiqueta.
+- En la representación con procedimientos, el constructor devuelve
+  una clausura que captura sus campos. Los extractores envían a la
+  clausura el mensaje con el nombre del campo, y los predicados le envían
+  `'tag` y comparan la respuesta. La estructura interna deja de ser
+  inspeccionable: lo único que se puede hacer con el dato es
+  enviarle mensajes.
+
+Ese cambio queda **del lado de adentro de la interfaz** por una razón que
+se puede enunciar con las propiedades que usan las demostraciones de la
+sección 2. Todo lo que se necesita de las funciones auxiliares es, para
+cada observador, la relación con su constructor:
+
+$$
+\texttt{mas-terminos->term}(\texttt{mas-terminos}(t, r)) = t, \qquad
+\texttt{mas-terminos->resto}(\texttt{mas-terminos}(t, r)) = r
+$$
+
+$$
+\texttt{mas-terminos?}(\texttt{mas-terminos}(t, r)) = \texttt{\#t}, \qquad
+\texttt{sin-terminos?}(\texttt{sin-terminos}()) = \texttt{\#t}
+$$
+
+y las ecuaciones análogas para `poli`, `termino`, `coef-ent`, `coef-rac`
+y `expo-nat`. Ambas representaciones cumplen estas ecuaciones. En
+consecuencia:
+
+1. Los lemas y las demostraciones de la sección 2 (Lema 1, Lema 2,
+   Lema 3 y las correcciones de `coeficiente-de` y `eliminar-termino`)
+   solo invocan constructores y observadores, y los razonamientos usan
+   únicamente esas ecuaciones. Por eso valen sin cambios en las dos
+   representaciones, que es lo que el informe indica al principio: las
+   demostraciones se hacen una sola vez.
+2. Como el texto de las funciones de la interfaz es el mismo, y cada
+   constructor y cada observador se comporta igual en ambos casos, con
+   los mismos datos de entrada cada función produce un resultado que
+   el cliente no puede distinguir, aunque por dentro sea una lista en
+   un caso y una clausura en otro.
+3. El invariante $\mathrm{Inv}$ es una propiedad de la **vista
+   concreta** (la que entregan los observadores y `polinomio->lista`), no de
+   la estructura interna. Por eso su preservación (Lema 3) tampoco depende
+   de la representación.
+
+La propiedad de la interfaz que impide al cliente distinguirlas es el
+**encapsulamiento** (la barrera de abstracción): el cliente solo puede
+interactuar con el dato mediante constructores, predicados y extractores, y
+esas operaciones cumplen la misma especificación en las dos
+representaciones.
+
+Hay un matiz práctico que lo confirma. Una clausura no se imprime ni se
+compara con `equal?` por su contenido, de modo que en la Parte 2 la salida
+de los ejemplos se obtiene con el auxiliar `poli->lista`, que se construye
+únicamente con observadores. Ese auxiliar es la forma correcta de
+"mirar" un polinomio en ambas representaciones, y por eso las pruebas
+comparan resultados a través de la interfaz (`coeficiente-de`,
+`sin-terminos?`, ...) y no la estructura bruta.
+
+### 3.3 Qué habría que hacer para que el cliente notara la diferencia
+
+Habría que escribir código cliente que **dependa de la representación**.
+Por ejemplo:
+
+- Aplicar `car` o `cadr` a un polinomio o a una lista de términos, o
+  preguntar `(eq? (car t) 'termino)` en lugar de `termino?`. Funciona con
+  listas y falla con procedimientos, porque una clausura no es un par.
+- Aplicar un polinomio como función, `(p 'terms)`, en lugar de
+  `poli->terms`. Funciona con procedimientos y falla con listas.
+- Comparar polinomios con `equal?` sobre la estructura bruta. Con listas
+  compara el contenido y con procedimientos solo la identidad de la clausura.
+- Depender del orden de los campos, del nombre de las etiquetas o de
+  los mensajes que entiende cada clausura.
+
+En cualquiera de esos casos el cliente sí notaría la diferencia, pero eso
+significa que la abstracción se rompió, y el responsable es el
+cliente: ya no usa el TAD sino uno de sus detalles internos, de modo que
+cambiar la representación lo deja sin funcionar. Es la situación que el
+taller quiere evitar al exigir que las cuatro funciones del cliente
+funcionen sin modificación sobre las tres representaciones. Mientras el
+cliente se limite a constructores, predicados y extractores, las
+representaciones son intercambiables.
 
 ---
 
@@ -553,5 +686,4 @@ Conviene que la explicación responda a esto:
   3.ª ed., MIT Press, 2008. Sección 2.1 (especificación de datos),
   sección 2.2 (representación basada en listas y basada en
   procedimientos), sección 2.4 (`define-datatype` y `cases`).
-- The Racket Reference, *Numbers* (representación de los racionales
-  exactos): https://docs.racket-lang.org/reference/numbers.html
+

@@ -1,7 +1,6 @@
 #lang eopl
-;Autores: Juan Eduardo Calderon Jaramillo | 2611001-3743 | juan.eduardo.calderon@correounivalle.edu.co  |
-;         Jesus David Lopez Diaz          | 2611029-3743 | jesus.david.lopez@correounivalle.edu.co      |
-;         Carlos Humberto Gutierrez Mejia | 2059817-3743 | carlos.humberto.gutierrez@correounivalle.edu.co |
+;Autores: Juan Eduardo Calderon Jaramillo | 2611001-3743
+;         Carlos Humberto Gutierrez Mejia | 2059817-3743
 
 
 ;; Taller 1 - Polinomios dispersos.
@@ -205,9 +204,9 @@
   (lambda ()
     (procs:eliminar-termino p-general-procs 3)))
 
-;; =====================================================================
-;; SECCIÓN DATATYPES (Carlos)
-;; =====================================================================
+
+;; SECCIÓN DATATYPES
+
 
 ;; Polinomios de referencia
 ;; dt-p  = 4x^5 - (3/2)x^2 + 7
